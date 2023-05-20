@@ -7,6 +7,7 @@ import {
 import { ethers } from "ethers";
 import { NextApiRequest, NextApiResponse } from "next";
 import * as anchor from "@project-serum/anchor";
+import { createHellowormProgramInterface } from "@/needed";
 
 interface sqData {
   data: number[];
@@ -25,25 +26,12 @@ export default async function handler(
     const connection = new anchor.web3.Connection(
       anchor.web3.clusterApiUrl("devnet")
     );
-    const keypair = anchor.web3.Keypair.fromSecretKey(
-      Uint8Array.from([
-        117, 236, 123, 231, 3, 86, 76, 118, 219, 53, 209, 116, 100, 107, 104,
-        45, 24, 212, 212, 172, 41, 90, 158, 45, 162, 77, 170, 77, 197, 203, 199,
-        97, 181, 137, 59, 14, 79, 91, 180, 227, 19, 63, 251, 94, 221, 222, 160,
-        247, 12, 133, 166, 5, 200, 154, 17, 14, 218, 164, 2, 86, 251, 33, 220,
-        237,
-      ])
-    );
-
-    const wallet = new anchor.Wallet(keypair);
-    const providerAnchor = new anchor.AnchorProvider(connection, wallet, {});
-    anchor.setProvider(providerAnchor);
 
     const programId = new anchor.web3.PublicKey(
       "GsTfE4Ndievuh8G5EWAPcS7aixwKyN5YdZNymq2cVfNV"
     );
 
-    const program = new anchor.Program(IDL as anchor.Idl, programId);
+    const program = createHellowormProgramInterface(connection, programId);
 
     const sequence = new anchor.web3.PublicKey(
       "6k4HrdhZdULGRrztGi4fGs5HrJkVjJ5FS5pz76muMLX6"
@@ -53,6 +41,7 @@ export default async function handler(
     // console.log(y);
     // console.log(JSON.stringify(y?.data));
     const numberSq = JSON.parse(JSON.stringify(y?.data)) as sqData;
+    console.log("Sequence: ", numberSq);
     // console.log();
 
     // console.log(BigInt(`0x${y?.data}`).toString());
