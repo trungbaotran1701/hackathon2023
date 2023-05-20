@@ -1,12 +1,9 @@
 import Head from "next/head";
-import { useWallet } from "@solana/wallet-adapter-react";
 import dynamic from "next/dynamic";
 import { Divider, Row } from "antd";
 
 const Wallet = dynamic(() => import(`../components/Wallet`), { ssr: false });
 export default function Home() {
-  const { select, wallets, publicKey, disconnect } = useWallet();
-  console.log(wallets);
   return (
     <>
       <Head>
