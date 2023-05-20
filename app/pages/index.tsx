@@ -1,6 +1,7 @@
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { Divider, Row, Tabs } from "antd";
+import { Divider, Tabs } from "antd";
+import { useState } from "react";
 
 const BSCWallets = dynamic(() => import(`../components/BSCWallet`), {
   ssr: false,
@@ -9,6 +10,9 @@ const SOLWalletsProvider = dynamic(() => import(`../components/SOLWallet`), {
   ssr: false,
 });
 export default function Home() {
+  const [isApprove, setIsApporve] = useState(false);
+  // const [activeTabs, setA]
+
   return (
     <>
       <Head>
@@ -29,7 +33,7 @@ export default function Home() {
           <Divider style={{ color: "white" }}>HACKATHON-2023 SOLANA</Divider>
 
           <Divider style={{ color: "white" }}>
-            Choose your network you want to play
+            PLEASE CONNECT ABOTH METAMASK & PHANTOM WALLET FIRST!
           </Divider>
           <Tabs
             items={[

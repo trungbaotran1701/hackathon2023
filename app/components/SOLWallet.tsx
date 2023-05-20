@@ -1,20 +1,28 @@
+import { WalletAddContext } from "@/context/WalletContext";
+import { IDL } from "@/config/config";
 import {
   ConnectionProvider,
   WalletProvider,
   useConnection,
   useWallet,
 } from "@solana/wallet-adapter-react";
+import { CORE_BRIDGE_PID } from "@/helper";
+import { createSendMessageInstruction } from "@/needed";
+import { Helloworm } from "@/helloworm";
 import {
   GlowWalletAdapter,
   MathWalletAdapter,
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
-import { clusterApiUrl } from "@solana/web3.js";
+import { Transaction, clusterApiUrl } from "@solana/web3.js";
 import { Button, Col, Image, Row, Space, Typography } from "antd";
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 const { Text } = Typography;
-
+import * as anchor from "@project-serum/anchor";
+import { ethers } from "ethers";
+import { sign } from "crypto";
+import { createHellowormProgramInterface } from "@/needed";
 const SOLWalletsProvider = () => {
   const wallets = useMemo(
     () => [
@@ -28,15 +36,24 @@ const SOLWalletsProvider = () => {
   const endpoint = useMemo(() => clusterApiUrl("devnet"), []);
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider wallets={wallets} autoConnect={true}>
         <SOLWallets />
       </WalletProvider>
     </ConnectionProvider>
   );
 };
 
+type MessageTransfer = {
+  from: ethers.Wallet["publicKey"];
+  to: ethers.Wallet["publicKey"];
+  tokenAddess: ethers.Wallet["publicKey"];
+  amount: number;
+};
+
 const SOLWallets = () => {
-  const { select, wallets, publicKey, disconnect, wallet } = useWallet();
+  const { select, wallets, publicKey, disconnect, signTransaction } =
+    useWallet();
+  const { phantomAdd, setPhantomAdd } = useContext(WalletAddContext);
 
   const { connection } = useConnection();
   const [balance, setBalance] = useState<any>();
@@ -49,10 +66,62 @@ const SOLWallets = () => {
   }, [publicKey]);
 
   useEffect(() => {
-    getBalance();
-  }, [getBalance]);
+    if (publicKey !== null) {
+      getBalance();
+      setPhantomAdd(publicKey.toBase58());
+    }
+  }, [getBalance, publicKey]);
   // const balance = useMemo(() => getBalance(), [getBalance, publicKey]);
-  console.log(balance);
+  // console.log(balance);
+
+  async function onSend() {
+    if (publicKey !== null) {
+      const connection = new anchor.web3.Connection(
+        anchor.web3.clusterApiUrl("devnet")
+      );
+
+      const programId = new anchor.web3.PublicKey(
+        "GsTfE4Ndievuh8G5EWAPcS7aixwKyN5YdZNymq2cVfNV"
+      );
+
+      const program = createHellowormProgramInterface(connection, programId);
+
+      const messageTransfer: MessageTransfer = {
+        from: "0x7C77FeBC3946afa7523d16EB63963a8845b72717",
+        to: "0x7bbE73aD24a8b329364B466C0236e8a35593acd0",
+        tokenAddess: "0xC0Ef7dE6a76183e80BDb78294E71e49d59d13761",
+        amount: 10000000000000000000,
+      };
+
+      const jsonString = JSON.stringify(messageTransfer);
+      let helloMessage = Buffer.from(jsonString, "utf8");
+      helloMessage = Buffer.concat([
+        Buffer.from(new Uint8Array([2])),
+        helloMessage,
+      ]);
+
+      const tx = new Transaction();
+
+      tx.add(
+        await createSendMessageInstruction(
+          connection,
+          program.programId,
+          publicKey,
+          CORE_BRIDGE_PID,
+          helloMessage
+        )
+      );
+
+      tx.feePayer = publicKey ?? undefined;
+      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+      if (signTransaction !== undefined) {
+        const signedTx = await signTransaction(tx);
+        const txId = await connection.sendRawTransaction(signedTx.serialize());
+        const a = await connection.confirmTransaction(txId);
+        console.log(a);
+      }
+    }
+  }
 
   return !publicKey ? (
     <Row gutter={[8, 8]}>
@@ -65,6 +134,7 @@ const SOLWallets = () => {
           .filter((wallet) => wallet.readyState === "Installed")
           .map((wallet) => (
             <Button
+              // disabled={metamaskAdd === null ? true : false}
               key={wallet.adapter.name}
               onClick={() => select(wallet.adapter.name)}
               icon={
@@ -87,11 +157,24 @@ const SOLWallets = () => {
     <Space direction="horizontal">
       Connected to:
       <Text keyboard copyable style={{ background: "white" }}>
-        {" "}
         {publicKey.toBase58()}
       </Text>
-      <Button type="primary" danger onClick={disconnect}>
+      <Button
+        type="primary"
+        danger
+        onClick={() => {
+          disconnect();
+          setPhantomAdd(null);
+        }}
+      >
         Disconnect
+      </Button>
+      <Button
+        disabled={phantomAdd === null}
+        type="primary"
+        onClick={() => onSend()}
+      >
+        Send
       </Button>
     </Space>
   );

@@ -7,7 +7,6 @@ import {
 import { ethers } from "ethers";
 import { NextApiRequest, NextApiResponse } from "next";
 import * as anchor from "@project-serum/anchor";
-// import { Idl } from "@coral-xyz/anchor";
 
 interface sqData {
   data: number[];
@@ -37,17 +36,17 @@ export default async function handler(
     );
 
     const wallet = new anchor.Wallet(keypair);
-    const provider1 = new anchor.AnchorProvider(connection, wallet, {});
-    anchor.setProvider(provider1);
+    const providerAnchor = new anchor.AnchorProvider(connection, wallet, {});
+    anchor.setProvider(providerAnchor);
 
     const programId = new anchor.web3.PublicKey(
-      "DWsqktwic4mJ5JbnsoBcBB646NWiBgjYuKJsTHXDRzPS"
+      "GsTfE4Ndievuh8G5EWAPcS7aixwKyN5YdZNymq2cVfNV"
     );
 
     const program = new anchor.Program(IDL as anchor.Idl, programId);
 
     const sequence = new anchor.web3.PublicKey(
-      "FSXG7Gvbf8iNYUjhUynbEqykPqRbGxhSR1tRyzxzjjFp"
+      "6k4HrdhZdULGRrztGi4fGs5HrJkVjJ5FS5pz76muMLX6"
     );
 
     const y = await program.provider.connection.getAccountInfo(sequence);
@@ -64,7 +63,7 @@ export default async function handler(
         "hex"
       )}`;
       const privateKey = process.env.PRIVATE_KEY_WALLET as string;
-      const provider = new ethers.JsonRpcProvider(NETWORK_URL);
+      const provider = new ethers.providers.JsonRpcProvider(NETWORK_URL);
       const signer = new ethers.Wallet(privateKey, provider);
       const contract = new ethers.Contract(
         WORMHOLE_ETH_SM_ADDRESS,

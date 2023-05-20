@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@certusone/wormhole-sdk": "^0.9.17",
-    "@project-serum/anchor": "^0.26.0",
     "@coral-xyz/anchor": "^0.27.0",
+    "@project-serum/anchor": "^0.26.0",
     "@solana/wallet-adapter-react": "^0.15.32",
     "@solana/wallet-adapter-wallets": "^0.19.16",
     "@solana/web3.js": "^1.76.0",
@@ -19,7 +19,6 @@
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",
     "antd": "^5.5.0",
-    "ethers": "^6.3.0",
     "fs": "^0.0.1-security",
     "next": "13.4.2",
     "react": "18.2.0",

