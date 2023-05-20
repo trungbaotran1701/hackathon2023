@@ -7,7 +7,7 @@ import {
 import { ethers } from "ethers";
 import { NextApiRequest, NextApiResponse } from "next";
 import * as anchor from "@project-serum/anchor";
-import { Idl } from "@coral-xyz/anchor";
+// import { Idl } from "@coral-xyz/anchor";
 
 interface sqData {
   data: number[];
@@ -44,7 +44,7 @@ export default async function handler(
       "DWsqktwic4mJ5JbnsoBcBB646NWiBgjYuKJsTHXDRzPS"
     );
 
-    const program = new anchor.Program(IDL as Idl, programId);
+    const program = new anchor.Program(IDL as anchor.Idl, programId);
 
     const sequence = new anchor.web3.PublicKey(
       "FSXG7Gvbf8iNYUjhUynbEqykPqRbGxhSR1tRyzxzjjFp"
