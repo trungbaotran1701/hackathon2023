@@ -53,7 +53,8 @@ type MessageTransfer = {
 const SOLWallets = () => {
   const { select, wallets, publicKey, disconnect, signTransaction } =
     useWallet();
-  const { phantomAdd, setPhantomAdd } = useContext(WalletAddContext);
+  const { metamaskAdd, phantomAdd, setPhantomAdd } =
+    useContext(WalletAddContext);
 
   const { connection } = useConnection();
   const [balance, setBalance] = useState<any>();
@@ -88,7 +89,7 @@ const SOLWallets = () => {
       const program = createHellowormProgramInterface(connection, programId);
 
       const messageTransfer: MessageTransfer = {
-        from: publicKey.toString(),
+        from: metamaskAdd ?? "",
         to: "0x86f93CdC9cD700C018AC0235D6eB249B38609A0f",
         tokenAddess: "0xec171F51676B62127a4BdfB145944cf8e6fDe08c",
         amount: 10000000000000000000,

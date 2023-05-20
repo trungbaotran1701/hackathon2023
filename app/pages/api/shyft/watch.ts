@@ -82,7 +82,7 @@ export interface WormholeResProps {
 async function getDataFromWormHole(
   sequence: string
 ): Promise<WormholeResProps> {
-  const url = `https://wormhole-v2-testnet-api.certus.one/v1/signed_vaa/1/31edd4c8dde7d88c8634cf36dcc9414d66baed7d23a92cc38ea63cf76c00dcc7/${sequence}`;
+  const url = `https://wormhole-v2-testnet-api.certus.one/v1/signed_vaa/1/48f36f42900d19f2c974355483d9fb397907481c344904bc2c56bd659890d867/${sequence}`;
   const response = await fetch(url, {
     method: "GET",
   });
