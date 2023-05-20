@@ -1,4 +1,3 @@
-import { AbiItem } from "web3-utils";
 import {
   Button,
   Col,
@@ -12,9 +11,9 @@ import {
   Space,
   Typography,
 } from "antd";
-import { Contract, ethers, parseUnits } from "ethers";
+import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import { ETH_ABI, ETH_CONTRACT_ADDRESS, NETWORK_URL } from "@/config/config";
+// import { ETH_ABI, ETH_CONTRACT_ADDRESS, NETWORK_URL } from "@/config/config";
 import { createTransaction } from "@/service/app.api";
 const { Text, Title } = Typography;
 

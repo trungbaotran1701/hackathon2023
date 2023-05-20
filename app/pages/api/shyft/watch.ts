@@ -38,7 +38,8 @@ export default async function handler(
   try {
     const result = await getDataFromWormHole(normalNumber);
     if (result.vaaBytes !== undefined) {
-      console.log(result.vaaBytes);
+      const hexString = Buffer.from(result.vaaBytes, "base64").toString("hex");
+      console.log("yo", hexString);
     } else {
       return;
     }
