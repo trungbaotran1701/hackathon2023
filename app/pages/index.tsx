@@ -1,8 +1,13 @@
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { Divider, Row } from "antd";
+import { Divider, Row, Tabs } from "antd";
 
-const Wallet = dynamic(() => import(`../components/Wallet`), { ssr: false });
+const BSCWallets = dynamic(() => import(`../components/BSCWallet`), {
+  ssr: false,
+});
+const SOLWalletsProvider = dynamic(() => import(`../components/SOLWallet`), {
+  ssr: false,
+});
 export default function Home() {
   return (
     <>
@@ -22,7 +27,24 @@ export default function Home() {
           }}
         >
           <Divider style={{ color: "white" }}>HACKATHON-2023 SOLANA</Divider>
-          <Wallet />
+
+          <Divider style={{ color: "white" }}>
+            Choose your network you want to play
+          </Divider>
+          <Tabs
+            items={[
+              {
+                key: "bsc",
+                label: "BSC SmartChain",
+                children: <BSCWallets />,
+              },
+              {
+                key: "sol",
+                label: "SOLANA Chain",
+                children: <SOLWalletsProvider />,
+              },
+            ]}
+          ></Tabs>
         </div>
       </main>
     </>

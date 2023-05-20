@@ -20,7 +20,7 @@ interface FormValuesProps {
   luckyNumber: number;
 }
 
-const Wallets = () => {
+const BSCWallets = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState(false);
 
@@ -210,4 +210,4 @@ const Wallets = () => {
   );
 };
 
-export default Wallets;
+export default BSCWallets;

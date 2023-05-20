@@ -1,6 +1,13 @@
+import {
+  NETWORK_URL,
+  WORMHOLE_ETH_ABI,
+  WORMHOLE_ETH_SM_ADDRESS,
+} from "@/config/config";
 import { formater } from "@/ultis/formater";
+import { ethers } from "ethers";
 import { NextApiRequest, NextApiResponse } from "next";
-
+import Web3 from "web3";
+import { AbiItem } from "web3-utils";
 interface ShyftCallProps {
   timestamp: string;
   fee: string;
@@ -38,8 +45,31 @@ export default async function handler(
   try {
     const result = await getDataFromWormHole(normalNumber);
     if (result.vaaBytes !== undefined) {
-      const hexString = Buffer.from(result.vaaBytes, "base64").toString("hex");
+      const hexString = `0x${Buffer.from(result.vaaBytes, "base64").toString(
+        "hex"
+      )}`;
       console.log("yo", hexString);
+      //  const web3 = new Web3(NETWORK_URL);
+
+      // const contract = new web3.eth.Contract(
+      //   WORMHOLE_ETH_ABI as AbiItem[],
+      //   WORMHOLE_ETH_SM_ADDRESS
+      // );
+      // await contract.methods.receiveMessage
+      const privateKey = process.env.PRIVATE_KEY_SERVER as string;
+      const provider = new ethers.JsonRpcProvider(NETWORK_URL);
+      const signer = new ethers.Wallet(privateKey, provider);
+
+      const contract = new ethers.Contract(
+        WORMHOLE_ETH_SM_ADDRESS,
+        WORMHOLE_ETH_ABI,
+        signer
+      );
+
+      let tx = await contract.receiveMessage(hexString);
+      const resultVjp = await tx.wait();
+
+      console.log(resultVjp);
     } else {
       return;
     }
