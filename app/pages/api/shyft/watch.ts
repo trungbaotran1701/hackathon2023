@@ -1,34 +1,17 @@
 import {
+  IDL,
   NETWORK_URL,
   WORMHOLE_ETH_ABI,
   WORMHOLE_ETH_SM_ADDRESS,
 } from "@/config/config";
-import { formater } from "@/ultis/formater";
 import { ethers } from "ethers";
 import { NextApiRequest, NextApiResponse } from "next";
-import Web3 from "web3";
-import { AbiItem } from "web3-utils";
-interface ShyftCallProps {
-  timestamp: string;
-  fee: string;
-  fee_payer: "5aMGztMuSVPAp4nm6vrkU25BAho6gGxpWHnnaKZfiUHP";
-  signers: ["5aMGztMuSVPAp4nm6vrkU25BAho6gGxpWHnnaKZfiUHP"];
-  signatures: string[];
-  protocol: {
-    address: string;
-    name: string;
-  };
-  type: string;
-  status: string;
-  actions: any[];
-  accounts: {
-    address: string;
-    owner: string;
-    lamports: number;
-    data: string;
-  }[];
-}
+import * as anchor from "@project-serum/anchor";
+import { Idl } from "@coral-xyz/anchor";
 
+interface sqData {
+  data: number[];
+}
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<any>
@@ -38,28 +21,51 @@ export default async function handler(
       msg: "Invalid method",
     });
   }
-  const body = req.body as ShyftCallProps;
-  const normalNumber = formater.formatSequence(
-    body.accounts[0].data.toString()
-  );
+
   try {
-    const result = await getDataFromWormHole(normalNumber);
+    const connection = new anchor.web3.Connection(
+      anchor.web3.clusterApiUrl("devnet")
+    );
+    const keypair = anchor.web3.Keypair.fromSecretKey(
+      Uint8Array.from([
+        117, 236, 123, 231, 3, 86, 76, 118, 219, 53, 209, 116, 100, 107, 104,
+        45, 24, 212, 212, 172, 41, 90, 158, 45, 162, 77, 170, 77, 197, 203, 199,
+        97, 181, 137, 59, 14, 79, 91, 180, 227, 19, 63, 251, 94, 221, 222, 160,
+        247, 12, 133, 166, 5, 200, 154, 17, 14, 218, 164, 2, 86, 251, 33, 220,
+        237,
+      ])
+    );
+
+    const wallet = new anchor.Wallet(keypair);
+    const provider1 = new anchor.AnchorProvider(connection, wallet, {});
+    anchor.setProvider(provider1);
+
+    const programId = new anchor.web3.PublicKey(
+      "DWsqktwic4mJ5JbnsoBcBB646NWiBgjYuKJsTHXDRzPS"
+    );
+
+    const program = new anchor.Program(IDL as Idl, programId);
+
+    const sequence = new anchor.web3.PublicKey(
+      "FSXG7Gvbf8iNYUjhUynbEqykPqRbGxhSR1tRyzxzjjFp"
+    );
+
+    const y = await program.provider.connection.getAccountInfo(sequence);
+    // console.log(y);
+    // console.log(JSON.stringify(y?.data));
+    const numberSq = JSON.parse(JSON.stringify(y?.data)) as sqData;
+    // console.log();
+
+    // console.log(BigInt(`0x${y?.data}`).toString());
+
+    const result = await getDataFromWormHole(numberSq.data[0].toString());
     if (result.vaaBytes !== undefined) {
       const hexString = `0x${Buffer.from(result.vaaBytes, "base64").toString(
         "hex"
       )}`;
-      console.log("yo", hexString);
-      //  const web3 = new Web3(NETWORK_URL);
-
-      // const contract = new web3.eth.Contract(
-      //   WORMHOLE_ETH_ABI as AbiItem[],
-      //   WORMHOLE_ETH_SM_ADDRESS
-      // );
-      // await contract.methods.receiveMessage
-      const privateKey = process.env.PRIVATE_KEY_SERVER as string;
+      const privateKey = process.env.PRIVATE_KEY_WALLET as string;
       const provider = new ethers.JsonRpcProvider(NETWORK_URL);
       const signer = new ethers.Wallet(privateKey, provider);
-
       const contract = new ethers.Contract(
         WORMHOLE_ETH_SM_ADDRESS,
         WORMHOLE_ETH_ABI,
@@ -67,16 +73,14 @@ export default async function handler(
       );
 
       let tx = await contract.receiveMessage(hexString);
-      const resultVjp = await tx.wait();
-
-      console.log(resultVjp);
+      await tx.wait();
     } else {
-      return;
+      console.log("con cai nit");
     }
   } catch (error) {
-    console.log("err", error);
-    return;
+    console.log("exc", error);
   }
+  return res.status(200).send("Finished");
 }
 
 export interface WormholeResProps {
