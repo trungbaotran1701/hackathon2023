@@ -47,10 +47,14 @@ export default async function handler(
     // console.log(BigInt(`0x${y?.data}`).toString());
 
     const result = await getDataFromWormHole((numberSq.data[0] - 1).toString());
+    console.log(result);
+
     if (result.vaaBytes !== undefined) {
       const hexString = `0x${Buffer.from(result.vaaBytes, "base64").toString(
         "hex"
       )}`;
+      console.log(hexString);
+
       const privateKey = process.env.PRIVATE_KEY_WALLET as string;
       const provider = new ethers.providers.JsonRpcProvider(NETWORK_URL);
       const signer = new ethers.Wallet(privateKey, provider);
@@ -62,6 +66,7 @@ export default async function handler(
 
       let tx = await contract.receiveMessage(hexString);
       await tx.wait();
+      console.log(tx);
     } else {
       console.log("con cai nit");
     }
