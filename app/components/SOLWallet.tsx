@@ -88,9 +88,9 @@ const SOLWallets = () => {
       const program = createHellowormProgramInterface(connection, programId);
 
       const messageTransfer: MessageTransfer = {
-        from: "0x7C77FeBC3946afa7523d16EB63963a8845b72717",
-        to: "0x7bbE73aD24a8b329364B466C0236e8a35593acd0",
-        tokenAddess: "0xC0Ef7dE6a76183e80BDb78294E71e49d59d13761",
+        from: publicKey.toString(),
+        to: "0x86f93CdC9cD700C018AC0235D6eB249B38609A0f",
+        tokenAddess: "0xec171F51676B62127a4BdfB145944cf8e6fDe08c",
         amount: 10000000000000000000,
       };
 
