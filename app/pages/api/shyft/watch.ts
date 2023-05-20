@@ -46,7 +46,7 @@ export default async function handler(
 
     // console.log(BigInt(`0x${y?.data}`).toString());
 
-    const result = await getDataFromWormHole(numberSq.data[0].toString());
+    const result = await getDataFromWormHole((numberSq.data[0] - 1).toString());
     if (result.vaaBytes !== undefined) {
       const hexString = `0x${Buffer.from(result.vaaBytes, "base64").toString(
         "hex"
