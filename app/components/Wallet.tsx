@@ -2,14 +2,13 @@ import {
   Button,
   Col,
   Form,
-  Image,
-  Input,
   InputNumber,
   Modal,
   Popconfirm,
   Row,
   Space,
   Typography,
+  message,
 } from "antd";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
@@ -84,7 +83,7 @@ const Wallets = () => {
     const luckyNumber = values.luckyNumber.toString();
     console.log(luckyNumber, selectedAddress);
 
-    const message = `${luckyNumber}`;
+    const numberMsg = `${luckyNumber}`;
 
     try {
       if (
@@ -93,38 +92,25 @@ const Wallets = () => {
         window.ethereum.request !== undefined
       ) {
         const from = selectedAddress;
-        const msg = `0x${Buffer.from(message, "utf8").toString("hex")}`;
+        const msg = `0x${Buffer.from(numberMsg, "utf8").toString("hex")}`;
         const sign = await window.ethereum.request({
           method: "personal_sign",
           params: [msg, from, "Example password"],
         });
-        const verify = ethers.verifyMessage(message, sign);
+        const verify = ethers.verifyMessage(numberMsg, sign);
 
         if (verify?.toLocaleLowerCase() === selectedAddress) {
           const result = await createTransaction(
-            message,
+            numberMsg,
             selectedAddress,
             sign
           );
           console.log(result);
 
-          console.log("ok");
+          message.success("Sucess");
         } else {
           console.log("false");
         }
-        // window.ethereum.
-        // const provider = new ethers.JsonRpcProvider(NETWORK_URL);
-        // const signer = await provider.getSigner();
-        // console.log(signer);
-        // const abi = ETH_ABI;
-        // const contract = new Contract(ETH_CONTRACT_ADDRESS, abi);
-
-        // const amount = parseInt("1.0", 18);
-
-        // const tx = await contract.transfer("ethers.eth", amount);
-
-        // const result = await tx.wait();
-        // console.log(result);
       }
     } catch (error) {
       console.log(error);
@@ -222,79 +208,6 @@ const Wallets = () => {
       )}
     </div>
   );
-  // return !publicKey ? (
-  //   <Row gutter={[8, 8]}>
-  //     <Col span={24}>
-  //       <Text style={{ color: "white" }}> Connect to SOLANA with:</Text>
-  //     </Col>
-  //     {wallets.filter((wallet) => wallet.readyState === "Installed").length >
-  //     0 ? (
-  //       wallets
-  //         .filter((wallet) => wallet.readyState === "Installed")
-  //         .map((wallet) => (
-  //           <Button
-  //             key={wallet.adapter.name}
-  //             onClick={() => select(wallet.adapter.name)}
-  //             icon={
-  //               <Image
-  //                 src={wallet.adapter.icon}
-  //                 alt={wallet.adapter.name}
-  //                 width={16}
-  //                 height={16}
-  //               />
-  //             }
-  //           >
-  //             {wallet.adapter.name}
-  //           </Button>
-  //         ))
-  //     ) : (
-  //       <Text>No wallet found. Please download a supported Solana wallet</Text>
-  //     )}
-  //   </Row>
-  // ) : (
-  //   <Row>
-  //     <Col span={24}>
-  //       <Space>
-  //         <Text
-  //           keyboard
-  //           copyable
-  //           style={{
-  //             background: "white",
-  //             fontSize: "1.2rem",
-  //             padding: 8,
-  //             borderRadius: 6,
-  //           }}
-  //         >
-  //           {publicKey.toBase58()}
-  //         </Text>
-  //         <Popconfirm
-  //           title="Are you sure?"
-  //           onConfirm={disconnect}
-  //           okText="Disconnect"
-  //         >
-  //           <Button type="primary" danger size="large">
-  //             Disconnect
-  //           </Button>
-  //         </Popconfirm>
-  //       </Space>
-  //     </Col>
-
-  //     <Col span={24}>
-  //       <Text>Balance</Text>
-  //       <Row gutter={[16, 16]}>
-  //         <Col span={24}>{`${
-  //           typeof balance === "number" && balance / 1000000000
-  //         } $SOL`}</Col>
-  //         <Col span={24}>
-  //           <Button type="primary" onClick={() => setOpenModal(true)}>
-  //             Send
-  //           </Button>
-  //         </Col>
-  //       </Row>
-  //     </Col>
-  //
-  //   </Row>
-  // );
 };
 
 export default Wallets;
