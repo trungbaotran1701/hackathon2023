@@ -1,7 +1,6 @@
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { Divider, Tabs } from "antd";
-import { useState } from "react";
 
 const BSCWallets = dynamic(() => import(`../components/BSCWallet`), {
   ssr: false,
@@ -10,9 +9,6 @@ const SOLWalletsProvider = dynamic(() => import(`../components/SOLWallet`), {
   ssr: false,
 });
 export default function Home() {
-  const [isApprove, setIsApporve] = useState(false);
-  // const [activeTabs, setA]
-
   return (
     <>
       <Head>
@@ -33,7 +29,7 @@ export default function Home() {
           <Divider style={{ color: "white" }}>HACKATHON-2023 SOLANA</Divider>
 
           <Divider style={{ color: "white" }}>
-            PLEASE CONNECT ABOTH METAMASK & PHANTOM WALLET FIRST!
+            CROSS CHAIN SEND TOKEN with SHYFT, SOLANA & ETHEREUM
           </Divider>
           <Tabs
             items={[

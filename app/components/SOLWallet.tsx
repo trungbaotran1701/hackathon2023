@@ -16,7 +16,7 @@ import {
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import { Transaction, clusterApiUrl } from "@solana/web3.js";
-import { Button, Col, Image, Row, Space, Typography } from "antd";
+import { Button, Col, Image, Row, Space, Typography, message } from "antd";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 const { Text } = Typography;
 import * as anchor from "@project-serum/anchor";
@@ -75,6 +75,7 @@ const SOLWallets = () => {
   // console.log(balance);
 
   async function onSend() {
+    message.loading("Please wait and dont do anything....");
     if (publicKey !== null) {
       const connection = new anchor.web3.Connection(
         anchor.web3.clusterApiUrl("devnet")
@@ -101,7 +102,7 @@ const SOLWallets = () => {
       ]);
 
       const tx = new Transaction();
-
+      message.loading("Please wait and dont do anything....");
       tx.add(
         await createSendMessageInstruction(
           connection,
@@ -118,7 +119,7 @@ const SOLWallets = () => {
         const signedTx = await signTransaction(tx);
         const txId = await connection.sendRawTransaction(signedTx.serialize());
         const a = await connection.confirmTransaction(txId);
-        console.log(a);
+        message.success("Success");
       }
     }
   }
@@ -155,8 +156,12 @@ const SOLWallets = () => {
     </Row>
   ) : (
     <Space direction="horizontal">
-      Connected to:
-      <Text keyboard copyable style={{ background: "white" }}>
+      <Text style={{ color: "white" }}>Connected to:</Text>
+      <Text
+        keyboard
+        copyable
+        style={{ background: "white", padding: 8, borderRadius: 8 }}
+      >
         {publicKey.toBase58()}
       </Text>
       <Button
