@@ -16,7 +16,16 @@ import {
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import { Transaction, clusterApiUrl } from "@solana/web3.js";
-import { Button, Col, Image, Row, Space, Typography, message } from "antd";
+import {
+  Button,
+  Col,
+  Divider,
+  Image,
+  Row,
+  Space,
+  Typography,
+  message,
+} from "antd";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 const { Text } = Typography;
 import * as anchor from "@project-serum/anchor";
@@ -103,7 +112,7 @@ const SOLWallets = () => {
       ]);
 
       const tx = new Transaction();
-      message.loading("Please wait and dont do anything....");
+
       tx.add(
         await createSendMessageInstruction(
           connection,
@@ -156,33 +165,35 @@ const SOLWallets = () => {
       )}
     </Row>
   ) : (
-    <Space direction="horizontal">
-      <Text style={{ color: "white" }}>Connected to:</Text>
-      <Text
-        keyboard
-        copyable
-        style={{ background: "white", padding: 8, borderRadius: 8 }}
-      >
-        {publicKey.toBase58()}
-      </Text>
-      <Button
-        type="primary"
-        danger
-        onClick={() => {
-          disconnect();
-          setPhantomAdd(null);
-        }}
-      >
-        Disconnect
-      </Button>
-      <Button
-        disabled={phantomAdd === null}
-        type="primary"
-        onClick={() => onSend()}
-      >
-        Send
-      </Button>
-    </Space>
+    <>
+      <Space direction="horizontal">
+        <Text style={{ color: "white" }}>Connected to:</Text>
+        <Text
+          keyboard
+          copyable
+          style={{ background: "white", padding: 8, borderRadius: 8 }}
+        >
+          {publicKey.toBase58()}
+        </Text>
+        <Button
+          type="primary"
+          danger
+          onClick={() => {
+            disconnect();
+            setPhantomAdd(null);
+          }}
+        >
+          Disconnect
+        </Button>
+        <Button
+          disabled={phantomAdd === null || metamaskAdd === null}
+          type="primary"
+          onClick={() => onSend()}
+        >
+          Send
+        </Button>
+      </Space>
+    </>
   );
 };
 
