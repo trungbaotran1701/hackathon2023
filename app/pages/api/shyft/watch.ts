@@ -105,10 +105,14 @@ async function getDataFromWormHole(
 
 async function Log(obj: any) {
   const response = await fetch(
-    "https://hackathon2023-rust.vercel.app/api/shyft/view",
+    "https://uafmqopjujmosmilsefw.functions.supabase.co/hello",
     {
       method: "POST",
       body: JSON.stringify(obj),
+      headers: {
+        Authorization:
+          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhZm1xb3BqdWptb3NtaWxzZWZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODMxODg2NzYsImV4cCI6MTk5ODc2NDY3Nn0.Bf4NzdTS-t2inGzSZguBAfZmnEBHTQj6Lx6KOfBzeSc",
+      },
     }
   );
   const result = await response.json();
