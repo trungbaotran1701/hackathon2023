@@ -21,10 +21,6 @@ export default async function handler(
       msg: "Invalid method",
     });
   }
-  fetch("https://hackathon2023-rust.vercel.app/api/shyft/view", {
-    method: "POST",
-    body: JSON.stringify({ start: "hieu logs" }),
-  });
 
   try {
     const connection = new anchor.web3.Connection(
@@ -41,73 +37,39 @@ export default async function handler(
       "6k4HrdhZdULGRrztGi4fGs5HrJkVjJ5FS5pz76muMLX6"
     );
 
-    program.provider.connection.getAccountInfo(sequence).then(async (y) => {
-      if (y !== null) {
-        const numberSq = JSON.parse(JSON.stringify(y?.data)) as sqData;
-
-        const log1 = await fetch(
-          "https://hackathon2023-rust.vercel.app/api/shyft/view",
-          {
-            method: "POST",
-            body: JSON.stringify(numberSq),
-          }
-        );
-        console.log("log1", log1);
-
-        getDataFromWormHole((numberSq.data[0] - 1).toString()).then(
-          async (result) => {
-            console.log(result);
-            if (result.vaaBytes !== undefined && result !== undefined) {
-              const hexString = `0x${Buffer.from(
-                result.vaaBytes,
-                "base64"
-              ).toString("hex")}`;
-              // console.log(hexString);
-              const log2 = await fetch(
-                "https://hackathon2023-rust.vercel.app/api/shyft/view",
-                {
-                  method: "POST",
-                  body: JSON.stringify({ hexString }),
-                }
-              );
-              console.log("log2", log2);
-
-              const privateKey = process.env.PRIVATE_KEY_WALLET as string;
-              const provider = new ethers.providers.JsonRpcProvider(
-                NETWORK_URL
-              );
-              const signer = new ethers.Wallet(privateKey, provider);
-              const contract = new ethers.Contract(
-                WORMHOLE_ETH_SM_ADDRESS,
-                WORMHOLE_ETH_ABI,
-                signer
-              );
-
-              contract.receiveMessage(hexString).then((tx: any) => {
-                tx.wait().then(async (txResult: any) => {
-                  const log3 = await fetch(
-                    "https://hackathon2023-rust.vercel.app/api/shyft/view",
-                    {
-                      method: "POST",
-                      body: JSON.stringify({ txResult }),
-                    }
-                  );
-                  console.log(log3);
-                });
-              });
-            } else {
-              console.log("con cai nit");
-            }
-          }
-        );
-      }
-    });
+    const y = await program.provider.connection.getAccountInfo(sequence);
     // console.log(y);
     // console.log(JSON.stringify(y?.data));
-
+    const numberSq = JSON.parse(JSON.stringify(y?.data)) as sqData;
+    console.log("Sequence: ", numberSq);
     // console.log();
 
     // console.log(BigInt(`0x${y?.data}`).toString());
+
+    const result = await getDataFromWormHole((numberSq.data[0] - 1).toString());
+    console.log(result);
+
+    if (result.vaaBytes !== undefined) {
+      const hexString = `0x${Buffer.from(result.vaaBytes, "base64").toString(
+        "hex"
+      )}`;
+      console.log(hexString);
+
+      const privateKey = process.env.PRIVATE_KEY_WALLET as string;
+      const provider = new ethers.providers.JsonRpcProvider(NETWORK_URL);
+      const signer = new ethers.Wallet(privateKey, provider);
+      const contract = new ethers.Contract(
+        WORMHOLE_ETH_SM_ADDRESS,
+        WORMHOLE_ETH_ABI,
+        signer
+      );
+
+      let tx = await contract.receiveMessage(hexString);
+      await tx.wait();
+      console.log(tx);
+    } else {
+      console.log("con cai nit");
+    }
   } catch (error) {
     console.log("exc", error);
   }
