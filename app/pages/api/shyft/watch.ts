@@ -76,7 +76,7 @@ export default async function handler(
                     });
                   },
                   (reject: any) => {
-                    Log({ rejectLog1: reject });
+                    Log({ rejectLog3: reject });
                   }
                 );
               } else {
@@ -84,7 +84,7 @@ export default async function handler(
               }
             },
             (reject) => {
-              Log({ rejectLog1: reject });
+              Log({ rejectLog2: reject });
             }
           );
         }
