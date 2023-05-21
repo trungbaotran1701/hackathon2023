@@ -21,10 +21,7 @@ export default async function handler(
       msg: "Invalid method",
     });
   }
-  fetch("https://hackathon2023-rust.vercel.app/api/shyft/view", {
-    method: "POST",
-    body: JSON.stringify({ start: "hieu logs" }),
-  });
+  Log({ start: "hieu" });
 
   try {
     const connection = new anchor.web3.Connection(
@@ -44,15 +41,7 @@ export default async function handler(
     program.provider.connection.getAccountInfo(sequence).then(async (y) => {
       if (y !== null) {
         const numberSq = JSON.parse(JSON.stringify(y?.data)) as sqData;
-
-        const log1 = await fetch(
-          "https://hackathon2023-rust.vercel.app/api/shyft/view",
-          {
-            method: "POST",
-            body: JSON.stringify(numberSq),
-          }
-        );
-        console.log("log1", log1);
+        Log({ numberSq });
 
         getDataFromWormHole((numberSq.data[0] - 1).toString()).then(
           async (result) => {
@@ -63,14 +52,7 @@ export default async function handler(
                 "base64"
               ).toString("hex")}`;
               // console.log(hexString);
-              const log2 = await fetch(
-                "https://hackathon2023-rust.vercel.app/api/shyft/view",
-                {
-                  method: "POST",
-                  body: JSON.stringify({ hexString }),
-                }
-              );
-              console.log("log2", log2);
+              Log({ hexString });
 
               const privateKey = process.env.PRIVATE_KEY_WALLET as string;
               const provider = new ethers.providers.JsonRpcProvider(
@@ -85,14 +67,7 @@ export default async function handler(
 
               contract.receiveMessage(hexString).then((tx: any) => {
                 tx.wait().then(async (txResult: any) => {
-                  const log3 = await fetch(
-                    "https://hackathon2023-rust.vercel.app/api/shyft/view",
-                    {
-                      method: "POST",
-                      body: JSON.stringify({ txResult }),
-                    }
-                  );
-                  console.log(log3);
+                  Log({ txResult });
                 });
               });
             } else {
@@ -126,4 +101,16 @@ async function getDataFromWormHole(
   });
   const result = await response.json();
   return result;
+}
+
+async function Log(obj: any) {
+  const response = await fetch(
+    "https://hackathon2023-rust.vercel.app/api/shyft/view",
+    {
+      method: "POST",
+      body: JSON.stringify(obj),
+    }
+  );
+  const result = await response.json();
+  console.log(result);
 }
