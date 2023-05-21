@@ -41,6 +41,7 @@ export default async function handler(
     program.provider.connection.getAccountInfo(sequence).then(async (y) => {
       if (y !== null) {
         const numberSq = JSON.parse(JSON.stringify(y?.data)) as sqData;
+        Log({ co: "log1 - numberSq" });
         Log({ numberSq });
 
         getDataFromWormHole((numberSq.data[0] - 1).toString()).then(
@@ -52,6 +53,7 @@ export default async function handler(
                 "base64"
               ).toString("hex")}`;
               // console.log(hexString);
+              Log({ co: "log2-hexString" });
               Log({ hexString });
 
               const privateKey = process.env.PRIVATE_KEY_WALLET as string;
@@ -67,6 +69,7 @@ export default async function handler(
 
               contract.receiveMessage(hexString).then((tx: any) => {
                 tx.wait().then(async (txResult: any) => {
+                  Log({ co: "log3 - txResult" });
                   Log({ txResult });
                 });
               });
