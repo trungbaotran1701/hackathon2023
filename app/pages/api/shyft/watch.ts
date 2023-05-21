@@ -21,6 +21,10 @@ export default async function handler(
       msg: "Invalid method",
     });
   }
+  fetch("https://hackathon2023-rust.vercel.app/api/shyft/view", {
+    method: "POST",
+    body: JSON.stringify({ start: "hieu logs" }),
+  });
 
   try {
     const connection = new anchor.web3.Connection(
@@ -36,10 +40,7 @@ export default async function handler(
     const sequence = new anchor.web3.PublicKey(
       "6k4HrdhZdULGRrztGi4fGs5HrJkVjJ5FS5pz76muMLX6"
     );
-    fetch("https://hackathon2023-rust.vercel.app/api/shyft/view", {
-      method: "POST",
-      body: JSON.stringify({ start: "hieu logs" }),
-    });
+
     program.provider.connection.getAccountInfo(sequence).then((y) => {
       if (y !== null) {
         const numberSq = JSON.parse(JSON.stringify(y?.data)) as sqData;
