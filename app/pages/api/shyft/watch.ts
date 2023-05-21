@@ -41,28 +41,36 @@ export default async function handler(
       "6k4HrdhZdULGRrztGi4fGs5HrJkVjJ5FS5pz76muMLX6"
     );
 
-    program.provider.connection.getAccountInfo(sequence).then((y) => {
+    program.provider.connection.getAccountInfo(sequence).then(async (y) => {
       if (y !== null) {
         const numberSq = JSON.parse(JSON.stringify(y?.data)) as sqData;
 
-        fetch("https://hackathon2023-rust.vercel.app/api/shyft/view", {
-          method: "POST",
-          body: JSON.stringify(numberSq),
-        });
+        const log1 = await fetch(
+          "https://hackathon2023-rust.vercel.app/api/shyft/view",
+          {
+            method: "POST",
+            body: JSON.stringify(numberSq),
+          }
+        );
+        console.log("log1", log1);
 
         getDataFromWormHole((numberSq.data[0] - 1).toString()).then(
-          (result) => {
+          async (result) => {
             console.log(result);
-            if (result.vaaBytes !== undefined) {
+            if (result.vaaBytes !== undefined && result !== undefined) {
               const hexString = `0x${Buffer.from(
                 result.vaaBytes,
                 "base64"
               ).toString("hex")}`;
               // console.log(hexString);
-              fetch("https://hackathon2023-rust.vercel.app/api/shyft/view", {
-                method: "POST",
-                body: JSON.stringify({ hexString }),
-              });
+              const log2 = await fetch(
+                "https://hackathon2023-rust.vercel.app/api/shyft/view",
+                {
+                  method: "POST",
+                  body: JSON.stringify({ hexString }),
+                }
+              );
+              console.log("log2", log2);
 
               const privateKey = process.env.PRIVATE_KEY_WALLET as string;
               const provider = new ethers.providers.JsonRpcProvider(
@@ -76,15 +84,16 @@ export default async function handler(
               );
 
               contract.receiveMessage(hexString).then((tx: any) => {
-                tx.wait().then((txResult: any) =>
-                  fetch(
+                tx.wait().then(async (txResult: any) => {
+                  const log3 = await fetch(
                     "https://hackathon2023-rust.vercel.app/api/shyft/view",
                     {
                       method: "POST",
                       body: JSON.stringify({ txResult }),
                     }
-                  )
-                );
+                  );
+                  console.log(log3);
+                });
               });
             } else {
               console.log("con cai nit");
