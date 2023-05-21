@@ -38,48 +38,62 @@ export default async function handler(
       "6k4HrdhZdULGRrztGi4fGs5HrJkVjJ5FS5pz76muMLX6"
     );
 
-    program.provider.connection.getAccountInfo(sequence).then(async (y) => {
-      if (y !== null) {
-        const numberSq = JSON.parse(JSON.stringify(y?.data)) as sqData;
-        Log({ co: "log1 - numberSq" });
-        Log({ numberSq });
+    program.provider.connection.getAccountInfo(sequence).then(
+      async (y) => {
+        if (y !== null) {
+          const numberSq = JSON.parse(JSON.stringify(y?.data)) as sqData;
+          Log({ co: "log1 - numberSq" });
+          Log({ numberSq });
 
-        getDataFromWormHole((numberSq.data[0] - 1).toString()).then(
-          async (result) => {
-            console.log(result);
-            if (result.vaaBytes !== undefined && result !== undefined) {
-              const hexString = `0x${Buffer.from(
-                result.vaaBytes,
-                "base64"
-              ).toString("hex")}`;
-              // console.log(hexString);
-              Log({ co: "log2-hexString" });
-              Log({ hexString });
+          getDataFromWormHole((numberSq.data[0] - 1).toString()).then(
+            async (result) => {
+              console.log(result);
+              if (result.vaaBytes !== undefined && result !== undefined) {
+                const hexString = `0x${Buffer.from(
+                  result.vaaBytes,
+                  "base64"
+                ).toString("hex")}`;
+                // console.log(hexString);
+                Log({ co: "log2-hexString" });
+                Log({ hexString });
 
-              const privateKey = process.env.PRIVATE_KEY_WALLET as string;
-              const provider = new ethers.providers.JsonRpcProvider(
-                NETWORK_URL
-              );
-              const signer = new ethers.Wallet(privateKey, provider);
-              const contract = new ethers.Contract(
-                WORMHOLE_ETH_SM_ADDRESS,
-                WORMHOLE_ETH_ABI,
-                signer
-              );
+                const privateKey = process.env.PRIVATE_KEY_WALLET as string;
+                const provider = new ethers.providers.JsonRpcProvider(
+                  NETWORK_URL
+                );
+                const signer = new ethers.Wallet(privateKey, provider);
+                const contract = new ethers.Contract(
+                  WORMHOLE_ETH_SM_ADDRESS,
+                  WORMHOLE_ETH_ABI,
+                  signer
+                );
 
-              contract.receiveMessage(hexString).then((tx: any) => {
-                tx.wait().then(async (txResult: any) => {
-                  Log({ co: "log3 - txResult" });
-                  Log({ txResult });
-                });
-              });
-            } else {
-              console.log("con cai nit");
+                contract.receiveMessage(hexString).then(
+                  (tx: any) => {
+                    tx.wait().then(async (txResult: any) => {
+                      Log({ co: "log3 - txResult" });
+                      Log({ txResult });
+                    });
+                  },
+                  (reject: any) => {
+                    Log({ rejectLog1: reject });
+                  }
+                );
+              } else {
+                console.log("con cai nit");
+              }
+            },
+            (reject) => {
+              Log({ rejectLog1: reject });
             }
-          }
-        );
+          );
+        }
+      },
+
+      (reject) => {
+        Log({ rejectLog1: reject });
       }
-    });
+    );
     // console.log(y);
     // console.log(JSON.stringify(y?.data));
 
